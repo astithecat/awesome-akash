@@ -1,0 +1,46 @@
+---
+version: "2.0"
+services:
+  celo:
+    image: us.gcr.io/celo-org/geth:alfajores
+    expose:
+      - port: 8545
+        as: 8545
+        to:
+          - global: true
+      - port: 8546
+        as: 8546
+        to:
+          - global: true
+      - port: 30303
+        as: 30303
+        to:
+          - global: true
+    env:
+      - CELO_ACCOUNT_ADDRESS=YOUR-ACCOUNT-ADDRESS
+    command:
+      - bash
+      - "-c"
+    args:
+      - geth --alfajores --verbosity 3 --syncmode full --http.vhosts=* --http --http.addr 0.0.0.0 --http.api eth,net,web3,debug,admin,personal --light.serve 90 --light.maxpeers 1000 --maxpeers 1100 --etherbase $CELO_ACCOUNT_ADDRESS --datadir /root/.celo
+profiles:
+  compute:
+    celo:
+      resources:
+        cpu:
+          units: 4
+        memory:
+          size: 8GB
+        storage:
+          - size: 256GB
+  placement:
+    dcloud:
+      pricing:
+        celo:
+          denom: uakt
+          amount: 1000
+deployment:
+  celo:
+    dcloud:
+      profile: celo
+      count: 1
